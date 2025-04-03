@@ -1,17 +1,15 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine.SceneManagement;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    float speed = 3f; // Speed of the player
-    float forwardSpeedUp = 0.3f; // Speed increment for forward movement
-    float rotateSpeed = 2f; // Speed of rotation
+    float speed = 0f; // Speed of the player
+    float forwardSpeedUp = 3f; // Speed increment for forward movement
+    float rotateSpeed = 80f; // Speed of rotation
     bool isMouseControl = true; // Flag to check if mouse control is enabled
     float secondsSinceLastFire = 0f; // Time since the last fire action
     float fireRate = 0.2f; // Rate of fire for the egg
     public GameObject eggPrefab; // Prefab for the egg object
+    //Vector3 directionFacing = new Vector3(0, 1, 0); // Direction the player is facing
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -37,6 +35,10 @@ public class Player : MonoBehaviour
         {
             FollowKeyboard(); // Follow keyboard input if mouse control is disabled
         }
+        if(Input.GetKey(KeyCode.Q))
+        {
+            Application.Quit(); // Quit the application if Q is pressed
+        }
         secondsSinceLastFire += Time.deltaTime; // Increment time since last fire
     }
 
@@ -46,6 +48,7 @@ public class Player : MonoBehaviour
         {
             // Fire an egg from the player
             GameObject egg = Instantiate(eggPrefab, transform.position, Quaternion.identity);
+            egg.transform.up = transform.up; // Set the egg's direction to the player's direction
             Debug.Log("Firing egg!");
             secondsSinceLastFire = 0f; // Reset the timer
         }
@@ -61,7 +64,6 @@ public class Player : MonoBehaviour
 
     void FollowKeyboard()
     {
-        transform.position += transform.forward * speed * Time.deltaTime;
         if(Input.GetKey(KeyCode.W))
         {
             speed += forwardSpeedUp * Time.deltaTime; // accelerate forward
@@ -72,18 +74,20 @@ public class Player : MonoBehaviour
         }
         if(Input.GetKey(KeyCode.A))
         {
-            transform.Rotate(Vector3.forward * rotateSpeed * Time.deltaTime); // rotate left
+            transform.Rotate(new Vector3(0,0,1) * rotateSpeed * Time.deltaTime); // rotate left
         }
         if(Input.GetKey(KeyCode.D))
         {
-            transform.Rotate(-Vector3.forward * rotateSpeed * Time.deltaTime); // rotate right
+            transform.Rotate(-new Vector3(0,0,1) * rotateSpeed * Time.deltaTime); // rotate right
         }
+        // Move the player forward in the direction it is facing
+        transform.position +=  transform.up * speed * Time.deltaTime;
     }
 
-    void OnTriggerEnter2D(Collider2D other)
+    void OnCollisionEnter2D(Collision2D collision)
     {
         // Check if the player collides with an object tagged "Enemy"
-        if (other.CompareTag("Enemy"))
+        if (collision.gameObject.CompareTag("Enemy"))
         {
             Debug.Log("Player collided with enemy!");
         }
@@ -93,6 +97,7 @@ public class Player : MonoBehaviour
     {
         // Switch controls between keyboard and mouse
         isMouseControl = !isMouseControl; // Switch to other control
+        Manager.Instance.isMouseControl = isMouseControl; // Update the game manager's control state
         Debug.Log("Switched controls!");
     }
 }
