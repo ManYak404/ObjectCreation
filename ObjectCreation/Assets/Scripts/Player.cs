@@ -5,10 +5,12 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    float speed = 0f; // Speed of the player
+    float speed = 3f; // Speed of the player
     float forwardSpeedUp = 0.3f; // Speed increment for forward movement
     float rotateSpeed = 2f; // Speed of rotation
     bool isMouseControl = true; // Flag to check if mouse control is enabled
+    float secondsSinceLastFire = 0f; // Time since the last fire action
+    float fireRate = 0.2f; // Rate of fire for the egg
     public GameObject eggPrefab; // Prefab for the egg object
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -35,13 +37,18 @@ public class Player : MonoBehaviour
         {
             FollowKeyboard(); // Follow keyboard input if mouse control is disabled
         }
+        secondsSinceLastFire += Time.deltaTime; // Increment time since last fire
     }
 
     void FireEgg()
     {
-        // Fire an egg from the player
-        GameObject egg = Instantiate(eggPrefab, transform.position, Quaternion.identity);
-        Debug.Log("Firing egg!");
+        if (secondsSinceLastFire >= fireRate) // Check if enough time has passed to fire again
+        {
+            // Fire an egg from the player
+            GameObject egg = Instantiate(eggPrefab, transform.position, Quaternion.identity);
+            Debug.Log("Firing egg!");
+            secondsSinceLastFire = 0f; // Reset the timer
+        }
     }
 
     void FollowMouse()
